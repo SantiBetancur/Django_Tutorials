@@ -16,8 +16,31 @@
  {{product.name}}
  {% endif %}
  </h5>
- <p class="card-text">{{product.description}}</p>
  <p class="card-text">${{price}}</p>
+ 
+ <!-- Comments Section -->
+ <div class="mt-4">
+     <h6>Comments:</h6>
+     {% for comment in product.comment_set.all %}
+     <div class="border-bottom pb-2 mb-2">
+         <p class="mb-1">{{ comment.description }}</p>
+         <small class="text-muted">{{ comment.created_at|date:"F j, Y" }}</small>
+     </div>
+     {% empty %}
+     <p class="text-muted">No comments yet.</p>
+     {% endfor %}
+ </div>
+ 
+ <!-- Add Comment Form -->
+ <div class="mt-4">
+     <h6>Add a Comment:</h6>
+     <form method="POST">
+         {% csrf_token %}
+         {{ comment_form.description }}
+         <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+     </form>
+ </div>
+ 
  </div>
  </div>
  </div>
