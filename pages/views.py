@@ -4,6 +4,7 @@ from django.views import View
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import Product
+from .utils import ImageLocalStorage
 # Create your views here.
 class HomePageView(TemplateView):
     template_name = 'pages/home.html'
@@ -161,4 +162,30 @@ class CartRemoveAllView(View):
         if 'cart_product_data' in request.session:
             del request.session['cart_product_data']
             return redirect('cart_index')
-        
+
+# With DI
+def ImageViewFactory(image_storage):
+    class ImageView(View):
+        template_name = 'images/index.html'
+
+        def get(self, request):
+            image_url = request.session.get('image_url', '')
+            return render(request, self.template_name, {'image_url': image_url})
+
+        def post(self, request):
+            image_url = image_storage.store(request)
+            request.session['image_url'] = image_url
+            return redirect('image_index')
+    return ImageView       
+
+# No DI
+class ImageViewNoDI(View):
+    template_name = 'images/index.html'
+    def get(self, request):
+        image_url = request.session.get('image_url', '')
+        return render(request, self.template_name, {'image_url': image_url})
+    def post(self, request):    # No DI
+        image_storage = ImageLocalStorage()
+        image_url = image_storage.store(request)
+        request.session['image_url'] = image_url
+        return redirect('image_index')
